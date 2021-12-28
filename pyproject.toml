@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "db_query"
+version = "0.1.0"
+description = ""
+authors = ["Dean"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pyathena = "^2.3.2"
+python-dotenv = "^0.19.2"
+pandas = "^1.3.5"
+typer = "^0.4.0"
+
+[tool.poetry.dev-dependencies]
+black = "^21.12b0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
