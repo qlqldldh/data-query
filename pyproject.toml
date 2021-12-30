@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "db_query"
+name = "data_query"
 version = "0.1.0"
-description = ""
+description = "query data from Athena without SQL knowledges"
 authors = ["Dean"]
 
 [tool.poetry.dependencies]
@@ -10,6 +10,7 @@ pyathena = "^2.3.2"
 python-dotenv = "^0.19.2"
 pandas = "^1.3.5"
 typer = "^0.4.0"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.12b0"
