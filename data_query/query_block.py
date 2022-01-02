@@ -12,7 +12,7 @@ class QueryBlock:
     conditions: dict[str, Union[str, int, float]]
     schema: str
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             self.name: {
                 "schema": self.schema,
@@ -22,5 +22,5 @@ class QueryBlock:
             }
         }
 
-    def serialize(self, f=None) -> str:
+    def serialize(self, f=None) -> Union[str, None]:
         return yaml.dump(self.to_dict(), f)

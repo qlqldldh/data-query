@@ -1,10 +1,9 @@
 from typing import List, Optional
 
-from typer import Option, Abort, echo, prompt
+from typer import Option, echo, prompt
 
 from data_query import app, q_manager
-from data_query.echo import success_echo, err_echo
-from data_query.query_block import QueryBlock
+from data_query.echo import success_echo
 
 
 @app.command(help="Create SQL Query")
@@ -29,17 +28,5 @@ def make_query(
             conditions.update({field: value})
             condition_seq += 1
 
-    q_manager.convert_data_to_pytype(tab, schema, conditions)
-
-    query_block = QueryBlock(
-        name=name, table=tab, columns=col, schema=schema, conditions=conditions
-    )
-
-    try:
-        result = q_manager.add_query_block(query_block)
-    except Exception as e:
-        err_echo(str(e))
-        raise Abort()
-
-    echo(result)
+    q_manager.add_query_block(name, tab, col, schema, conditions)
     success_echo("Success to make query")
