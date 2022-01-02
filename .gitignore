@@ -159,3 +159,6 @@ poetry.lock
 
 # sql file
 sql.yaml
+
+# DS_Store
+.DS_Store
