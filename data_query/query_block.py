@@ -1,3 +1,5 @@
+from typing import Union
+
 from dataclasses import dataclass
 import yaml
 
@@ -7,7 +9,7 @@ class QueryBlock:
     name: str
     table: str
     columns: list[str]
-    conditions: dict[str, str]
+    conditions: dict[str, Union[str, int, float]]
     schema: str
 
     def to_dict(self):

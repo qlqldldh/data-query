@@ -17,17 +17,19 @@ def make_query(
 ):
     conditions = dict()
     if has_condition:
-        echo("Format: 'Field'='value'")
+        echo("Format: Field=value")
         echo("If you want to finish to set condition, type 'quit'.")
-        seq = 1
+        condition_seq = 1
         while True:
-            cond = prompt(f"[Condition {seq}]: ")
-            if cond.lower() == "quit":
+            condition = prompt(f"[Condition {condition_seq}]: ")
+            if condition.lower() == "quit":
                 break
 
-            field, value = cond.split("=")
+            field, value = condition.split("=")
             conditions.update({field: value})
-            seq += 1
+            condition_seq += 1
+
+    q_manager.convert_data_to_pytype(tab, schema, conditions)
 
     query_block = QueryBlock(
         name=name, table=tab, columns=col, schema=schema, conditions=conditions
