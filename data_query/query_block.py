@@ -24,3 +24,12 @@ class QueryBlock:
 
     def serialize(self, f=None) -> Union[str, None]:
         return yaml.dump(self.to_dict(), f)
+
+    @classmethod
+    def from_file(cls, file: str, name: str):
+        with open(file) as f:
+            query_block = yaml.load(f, Loader=yaml.Loader).get(name)
+            if not query_block:
+                raise ValueError("Not existed query block in file.")
+            
+            return cls(name=name, **query_block)

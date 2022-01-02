@@ -10,7 +10,7 @@ from data_query.utils.type_casting import data_sql_str_to_py_type
 
 
 class QManager:
-    QUERY_FILE = "sql.yaml"
+    QUERY_FILE_PATH = f"{ROOT_PATH}/sql.yaml"
 
     def __init__(self):
         try:
@@ -32,18 +32,25 @@ class QManager:
             table=table,
             columns=columns,
             schema=schema,
-            conditions=self.convert_data_to_pytype(table, schema, conditions),
+            conditions=self.cast_data_to_pytype(table, schema, conditions),
         )
         try:
-            with open(f"{ROOT_PATH}/{self.QUERY_FILE}", "a") as f:
+            with open(self.QUERY_FILE_PATH, "a") as f:
                 serialized_query_block = query_block.serialize(f)
         except Exception as e:
             err_echo(str(e))
             raise Abort()
 
         return serialized_query_block
+    
+    def get_query_block(self, name: str) -> QueryBlock:
+        try:
+            return QueryBlock.from_file(self.QUERY_FILE_PATH, name)
+        except Exception as e:
+            err_echo(str(e))
+            raise Abort()
 
-    def convert_data_to_pytype(self, tab: str, schema: str, data: dict) -> dict:
+    def cast_data_to_pytype(self, tab: str, schema: str, data: dict) -> dict:
         converted_data = dict()
         try:
             columns_info = self.get_table_columns(tab, schema, tuple(data.keys()))
