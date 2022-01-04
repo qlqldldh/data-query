@@ -4,7 +4,7 @@ from data_query.settings import ROOT_PATH
 from data_query.client import AthenaClient
 from data_query.query_block import QueryBlock
 from data_query.utils.queries import make_query_str
-from data_query.utils.type_casting import data_sql_str_to_py_type
+from data_query.utils.type_casting import cast_sql_to_py_type
 
 
 class QManager:
@@ -29,13 +29,11 @@ class QManager:
             conditions=self.cast_data_to_pytype(table, schema, conditions),
         )
         with open(self.QUERY_FILE_PATH, "a") as f:
-            serialized_query_block = query_block.serialize(f)
-
-        return serialized_query_block
+            query_block.serialize(f)
 
     def get_query_result(self, name: str, n: int, to_csv: bool = False) -> DataFrame:
         query_block = self.get_query_block(name)
-        result = self._db_client.get_query_result(query=query_block.to_str(), n=n)
+        result = self._db_client.get_query_result(query=query_block.to_query(), n=n)
 
         if to_csv:
             result.to_csv(f"{ROOT_PATH}/{name}.csv")
@@ -43,14 +41,17 @@ class QManager:
         return result
 
     def get_query_block(self, name: str) -> QueryBlock:
-        return QueryBlock.from_file(self.QUERY_FILE_PATH, name)
+        try:
+            return QueryBlock.from_file(self.QUERY_FILE_PATH, name)
+        except FileNotFoundError:
+            raise Exception("'sql.yaml' file does not exist.")
 
     def cast_data_to_pytype(self, tab: str, schema: str, data: dict) -> dict:
         converted_data = dict()
         columns_info = self.get_table_columns(tab, schema, tuple(data.keys()))
 
         for field, type_obj in columns_info.items():
-            converted_data[field] = data_sql_str_to_py_type(
+            converted_data[field] = cast_sql_to_py_type(
                 data.get(field), type_obj["data_type"]
             )
 

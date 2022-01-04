@@ -1,7 +1,7 @@
 from typing import Any
 
 
-def data_sql_str_to_py_type(data: str, sql_data_type: str):
+def cast_sql_to_py_type(data: str, sql_data_type: str):
     if sql_data_type in ["varchar", "char"]:
         return str(data)
     if sql_data_type in ["float", "double"]:
@@ -14,7 +14,7 @@ def data_sql_str_to_py_type(data: str, sql_data_type: str):
         raise ValueError("Not supported sql type yet.")
 
 
-def data_py_to_sql_str(data: Any):
+def cast_py_to_sql_str(data: Any):
     if isinstance(data, str):
         return f"'{data}'"
     if isinstance(data, bool):

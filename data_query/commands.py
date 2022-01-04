@@ -14,6 +14,9 @@ def make_query(
     col: Optional[List[str]] = Option(None),
     schema: str = Option("default", show_default=False),
 ):
+    if not col:
+        col = ("*")
+
     conditions = dict()
     if has_condition:
         echo("Format: Field=value")

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import yaml
 
 from data_query.utils.queries import make_query_str
-from data_query.utils.type_casting import data_py_to_sql_str
+from data_query.utils.type_casting import cast_py_to_sql_str
 
 
 @dataclass
@@ -21,7 +21,7 @@ class QueryBlock:
     @classmethod
     def from_file(cls, file: str, name: str):
         with open(file) as f:
-            query_block = yaml.load(f, Loader=yaml.Loader).get(name)
+            query_block: dict = yaml.load(f, Loader=yaml.Loader).get(name)
             if not query_block:
                 raise ValueError("Not existed query block in file.")
 
@@ -37,9 +37,9 @@ class QueryBlock:
             }
         }
 
-    def to_str(self) -> str:
+    def to_query(self) -> str:
         conditions = []
         for column, value in self.conditions.items():
-            conditions.append(f"{column}={data_py_to_sql_str(value)}")
+            conditions.append(f"{column}={cast_py_to_sql_str(value)}")
 
         return make_query_str(self.columns, f'"{self.schema}".{self.table}', conditions)
