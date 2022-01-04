@@ -162,3 +162,6 @@ sql.yaml
 
 # DS_Store
 .DS_Store
+
+# etc
+*.csv

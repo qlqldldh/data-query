@@ -1,23 +1,17 @@
-from typer import Abort
+from pandas.core.frame import DataFrame
 
 from data_query.settings import ROOT_PATH
-
 from data_query.client import AthenaClient
-from data_query.echo import err_echo
 from data_query.query_block import QueryBlock
 from data_query.utils.queries import make_query_str
-from data_query.utils.type_casting import data_sql_str_to_py_type
+from data_query.utils.type_casting import cast_sql_to_py_type
 
 
 class QManager:
-    QUERY_FILE = "sql.yaml"
+    QUERY_FILE_PATH = f"{ROOT_PATH}/sql.yaml"
 
     def __init__(self):
-        try:
-            self._db_client = AthenaClient()
-        except Exception as e:
-            err_echo(str(e))
-            raise Abort()
+        self._db_client = AthenaClient()
 
     def add_query_block(
         self,
@@ -32,31 +26,36 @@ class QManager:
             table=table,
             columns=columns,
             schema=schema,
-            conditions=self.convert_data_to_pytype(table, schema, conditions),
+            conditions=self.cast_data_to_pytype(table, schema, conditions),
         )
+        with open(self.QUERY_FILE_PATH, "a") as f:
+            query_block.serialize(f)
+
+    def get_query_result(self, name: str, n: int, to_csv: bool = False) -> DataFrame:
+        query_block = self.get_query_block(name)
+        result = self._db_client.get_query_result(query=query_block.to_query(), n=n)
+
+        if to_csv:
+            result.to_csv(f"{ROOT_PATH}/{name}.csv")
+
+        return result
+
+    def get_query_block(self, name: str) -> QueryBlock:
         try:
-            with open(f"{ROOT_PATH}/{self.QUERY_FILE}", "a") as f:
-                serialized_query_block = query_block.serialize(f)
-        except Exception as e:
-            err_echo(str(e))
-            raise Abort()
+            return QueryBlock.from_file(self.QUERY_FILE_PATH, name)
+        except FileNotFoundError:
+            raise Exception("'sql.yaml' file does not exist.")
 
-        return serialized_query_block
-
-    def convert_data_to_pytype(self, tab: str, schema: str, data: dict) -> dict:
+    def cast_data_to_pytype(self, tab: str, schema: str, data: dict) -> dict:
         converted_data = dict()
-        try:
-            columns_info = self.get_table_columns(tab, schema, tuple(data.keys()))
+        columns_info = self.get_table_columns(tab, schema, tuple(data.keys()))
 
-            for field, type_obj in columns_info.items():
-                converted_data[field] = data_sql_str_to_py_type(
-                    data.get(field), type_obj["data_type"]
-                )
+        for field, type_obj in columns_info.items():
+            converted_data[field] = cast_sql_to_py_type(
+                data.get(field), type_obj["data_type"]
+            )
 
-            return converted_data
-        except ValueError as e:
-            err_echo(str(e))
-            raise Abort()
+        return converted_data
 
     def get_table_columns(self, tab: str, schema: str, cols: tuple[str]) -> dict:
         fields = ["column_name", "data_type"]
